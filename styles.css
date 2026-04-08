@@ -117,9 +117,11 @@ header {
   font-weight: 600;
 }
 
+
 .header-name-div {
   display: flex;
   align-items: center;
+   gap: 10px;
 }
 
 .logo-mobile {
@@ -395,17 +397,130 @@ form select {
 }
 
 /******** Mobile ********/
+.logo-mobile {
+  display: none;
+}
+
 @media screen and (max-width: 576px) {
-  .card-column-main {
-    grid-template-columns: minmax(
-      0,
-      380px
-    ); /* Stack columns in single column */
+
+  .logo-mobile {
+    display: block;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
   }
 
-  .column-div {
-    padding: 24px;
+   header h2 {
+    display: none;
   }
+
+@media screen and (max-width: 576px) {
+
+  #add-task-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    font-size: 0; /* hide text safely */
+  }
+
+  #add-task-btn::before {
+    content: "+";
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+}
+
+}
+
+/* ========================
+   MOBILE MENU MODAL
+======================== */
+
+#mobile-menu-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#mobile-menu-modal::backdrop {
+  background: rgba(0,0,0,0.35);
+}
+
+.mobile-menu {
+  background: var(--primary-color);
+  border-radius: 12px;
+
+  width: 320px;
+  max-width: 90vw;
+  min-height: 220px;
+
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.15);
+}
+
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-menu h4 {
+  margin: 0;
+}
+
+/* Board button inside modal */
+.mobile-menu .board-btn {
+  width: 100%;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Theme toggle inside modal */
+.mobile-menu .theme-toggle {
+  position: relative;
+  bottom: auto;
+  left: auto;
+
+  width: 100%;
+  height: 40px;
+
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--secondary-color);
+  border-radius: 30px;
+}
+
+/* Slightly smaller switch */
+.mobile-menu .switch {
+  width: 42px;
+  height: 20px;
+}
+
+.mobile-menu .slider::before {
+  width: 16px;
+  height: 16px;
+  bottom: 2px;
+}
+
+.mobile-menu input:checked + .slider::before {
+  transform: translateX(22px);
 }
 
 
