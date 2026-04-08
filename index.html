@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./scripts.js" type="module"></script>
+    <title>Kanban Task Management</title>
+  </head>
+
+  <body>
+    <!-- Side bar -->
+    <nav class="side-bar">
+      <div id="side-logo-div">
+        <img id="logo" src="./assets/logo-light.svg" />
+      </div>
+      <div class="boards-nav-links-div">
+        <h4>ALL BOARDS (1)</h4>
+        <button class="board-btn">Launch Career</button>
+      </div>
+    </nav>
+
+    <div id="layout">
+      <header>
+        <h2>Launch Career</h2>
+         <!-- ADD TASK BUTTON -->
+      <div class="add-task-wrapper">
+        <button id="add-task-btn">+ Add Task</button>
+      </div>
+      </header>
+
+      <div class="container">
+        <main class="card-column-main">
+          <div class="column-div" data-status="todo">
+            <h4>TODO</h4>
+            <div class="tasks-container"></div>
+          </div>
+
+          <div class="column-div" data-status="doing">
+            <h4>DOING</h4>
+            <div class="tasks-container"></div>
+          </div>
+
+          <div class="column-div" data-status="done">
+            <h4>DONE</h4>
+            <div class="tasks-container"></div>
+          </div>
+        </main>
+      </div>
+
+     
+    </div>
+
+    <!-- MODAL -->
+    <dialog id="task-modal">
+  <form method="dialog" id="task-form">
+    <!-- Header -->
+    <div class="modal-header">
+      <h3 id="modal-title">Task</h3>
+      <button type="button" class="close-btn" id="close-modal-btn">
+            &times;
+          </button>
+    </div>
+
+    <!-- Inputs -->
+    <label>Title</label>
+    <input type="text" id="task-title" required />
+
+    <label>Description</label>
+    <textarea id="task-desc"></textarea>
+
+    <label>Status</label>
+    <select id="task-status">
+      <option value="todo">To Do</option>
+      <option value="doing">Doing</option>
+      <option value="done">Done</option>
+    </select>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <button type="submit">Save Task</button>
+      <button type="button" id="delete-task-btn">Delete</button>
+    </div>
+  </form>
+</dialog>
+  </body>
+</html>
