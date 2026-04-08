@@ -1,7 +1,28 @@
 const API_URL = "https://jsl-kanban-api.vercel.app/";
+const STORAGE_KEY = "kanban_tasks";
 
 let tasks = [];
 let editingTaskId = null;
+
+/* ---------- LOCAL STORAGE ---------- */
+
+// Save tasks
+function saveTasksToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+// Load tasks
+function loadTasksFromStorage() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+
+  if (stored) {
+    try {
+      tasks = JSON.parse(stored);
+    } catch {
+      tasks = [];
+    }
+  }
+}
 
 /* ---------- FETCH TASKS FROM API ---------- */
 async function fetchTasks() {
@@ -28,12 +49,17 @@ async function fetchTasks() {
 
     tasks = data;
 
+    // ✅ Save fresh data to localStorage
+    saveTasksToStorage();
+
+    renderTasks();
+
   } catch (err) {
     console.error("Error fetching tasks:", err);
 
     if (errorMessage) {
       errorMessage.textContent =
-        "⚠️ Failed to load tasks. Please refresh or try again later.";
+        "⚠️ Failed to load tasks. Showing cached data.";
       errorMessage.style.display = "block";
     }
 
@@ -104,7 +130,7 @@ function getTaskContainerByStatus(status) {
 function renderTasks() {
   document
     .querySelectorAll(".tasks-container")
-    .forEach((container) => (container.innerHTML = ""));
+    .forEach((c) => (c.innerHTML = ""));
 
   tasks.forEach((task) => {
     const container = getTaskContainerByStatus(task.status);
@@ -142,6 +168,51 @@ function openTaskModal(task = null) {
   modal.showModal();
 }
 
+/*------------Delete / Button --------------*/
+
+async function deleteTask(id) {
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      throw new Error(`Delete failed: ${res.status}`);
+    }
+  } catch (err) {
+    console.error("Error deleting task:", err);
+  }
+}
+
+//Delete Handler
+
+function handleDeleteTask() {
+  if (!editingTaskId) return;
+
+  const confirmDelete = confirm(
+    "Are you sure you want to delete this task?"
+  );
+
+  if (!confirmDelete) return;
+
+  // remove from array
+  tasks = tasks.filter((task) => task.id !== editingTaskId);
+
+  // update UI
+  renderTasks();
+
+  // update local storage
+  saveTasksToStorage();
+
+  // delete from API
+  deleteTask(editingTaskId);
+
+  // close modal
+  document.getElementById("task-modal").close();
+
+  editingTaskId = null;
+}
+
 /* ---------- SAVE / UPDATE TASK ---------- */
 async function handleFormSubmit(e) {
   e.preventDefault();
@@ -151,32 +222,55 @@ async function handleFormSubmit(e) {
   const status = document.getElementById("task-status").value;
 
   if (editingTaskId) {
+    // ✅ UPDATE LOCALLY FIRST (instant UI)
+    const task = tasks.find((t) => t.id === editingTaskId);
+
+    if (task) {
+      task.title = title;
+      task.description = desc;
+      task.status = status;
+    }
+
+    renderTasks();
+    saveTasksToStorage();
+
+    // ✅ THEN update API
     await updateTask(editingTaskId, {
       title,
       description: desc,
-      status
+      status,
     });
+
   } else {
     const newTask = {
+      id: Date.now(), // local ID
       title,
       description: desc,
       status,
-      board: "Launch Career"
+      board: "Launch Career",
     };
 
+    // ✅ Add locally first
+    tasks.push(newTask);
+    renderTasks();
+    saveTasksToStorage();
+
+    // ✅ Then send to API
     await createTask(newTask);
   }
-
-  await fetchTasks();
-  renderTasks();
 
   document.getElementById("task-modal").close();
 }
 
 /* ---------- INIT ---------- */
 async function init() {
-  await fetchTasks();
+
+  // ✅ Load cached tasks first (instant UI)
+  loadTasksFromStorage();
   renderTasks();
+
+  // ✅ Then fetch fresh data
+  await fetchTasks();
 
   document
     .getElementById("add-task-btn")
@@ -191,6 +285,10 @@ async function init() {
     .addEventListener("click", () =>
       document.getElementById("task-modal").close()
     );
+
+    document
+  .getElementById("delete-task-btn")
+  .addEventListener("click", handleDeleteTask);
 }
 
 document.addEventListener("DOMContentLoaded", init);
