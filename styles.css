@@ -469,3 +469,24 @@ form select {
 .modal-actions button[type="button"] {
   background: #eee;
 }
+
+/* ========================
+   Loading Message
+======================== */
+#loading-message {
+  display: none; /* hidden by default */
+  text-align: center;
+  font-weight: bold;
+  color: var(--secondary-font-color);
+  padding: 20px;
+}
+
+/* Error message */
+
+#error-message {
+  display: none;
+  text-align: center;
+  color: #ea5555;
+  font-weight: bold;
+  padding: 12px;
+}

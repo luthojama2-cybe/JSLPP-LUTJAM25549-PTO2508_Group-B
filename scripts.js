@@ -1,26 +1,84 @@
-import { initialTasks } from "./initialData.js";
-
-const STORAGE_KEY = "kanban_tasks";
+const API_URL = "https://jsl-kanban-api.vercel.app/";
 
 let tasks = [];
 let editingTaskId = null;
 
-/* ---------- LOCAL STORAGE ---------- */
+/* ---------- FETCH TASKS FROM API ---------- */
+async function fetchTasks() {
+  const loading = document.getElementById("loading-message");
+  const errorMessage = document.getElementById("error-message");
 
-// Save tasks to localStorage
-function saveTasksToStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  try {
+    if (loading) loading.style.display = "block";
+    if (errorMessage) errorMessage.style.display = "none";
+
+    const res = await fetch(API_URL);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error: ${res.status}`);
+    }
+
+    const contentType = res.headers.get("content-type");
+
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Response is not JSON");
+    }
+
+    const data = await res.json();
+
+    tasks = data;
+
+  } catch (err) {
+    console.error("Error fetching tasks:", err);
+
+    if (errorMessage) {
+      errorMessage.textContent =
+        "⚠️ Failed to load tasks. Please refresh or try again later.";
+      errorMessage.style.display = "block";
+    }
+
+  } finally {
+    if (loading) loading.style.display = "none";
+  }
 }
 
-// Load tasks from localStorage
-function loadTasksFromStorage() {
-  const storedTasks = localStorage.getItem(STORAGE_KEY);
+/* ---------- CREATE TASK ---------- */
+async function createTask(task) {
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(task)
+    });
 
-  if (storedTasks) {
-    tasks = JSON.parse(storedTasks);
-  } else {
-    tasks = [...initialTasks];
-    saveTasksToStorage(); // save initial data on first load
+    if (!res.ok) {
+      throw new Error(`Create failed: ${res.status}`);
+    }
+
+  } catch (err) {
+    console.error("Error creating task:", err);
+  }
+}
+
+/* ---------- UPDATE TASK ---------- */
+async function updateTask(id, updatedTask) {
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(updatedTask)
+    });
+
+    if (!res.ok) {
+      throw new Error(`Update failed: ${res.status}`);
+    }
+
+  } catch (err) {
+    console.error("Error updating task:", err);
   }
 }
 
@@ -44,10 +102,13 @@ function getTaskContainerByStatus(status) {
 
 /* ---------- RENDER ---------- */
 function renderTasks() {
-  document.querySelectorAll(".tasks-container").forEach((c) => (c.innerHTML = ""));
+  document
+    .querySelectorAll(".tasks-container")
+    .forEach((container) => (container.innerHTML = ""));
 
   tasks.forEach((task) => {
     const container = getTaskContainerByStatus(task.status);
+
     if (container) {
       container.appendChild(createTaskElement(task));
     }
@@ -65,12 +126,14 @@ function openTaskModal(task = null) {
   if (task) {
     editingTaskId = task.id;
     modalTitle.textContent = "Edit Task";
+
     title.value = task.title;
     desc.value = task.description;
     status.value = task.status;
   } else {
     editingTaskId = null;
     modalTitle.textContent = "Add Task";
+
     title.value = "";
     desc.value = "";
     status.value = "todo";
@@ -80,7 +143,7 @@ function openTaskModal(task = null) {
 }
 
 /* ---------- SAVE / UPDATE TASK ---------- */
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
   e.preventDefault();
 
   const title = document.getElementById("task-title").value;
@@ -88,33 +151,31 @@ function handleFormSubmit(e) {
   const status = document.getElementById("task-status").value;
 
   if (editingTaskId) {
-    // EDIT
-    const task = tasks.find((t) => t.id === editingTaskId);
-    task.title = title;
-    task.description = desc;
-    task.status = status;
+    await updateTask(editingTaskId, {
+      title,
+      description: desc,
+      status
+    });
   } else {
-    // CREATE
     const newTask = {
-      id: Date.now(),
       title,
       description: desc,
       status,
-      board: "Launch Career",
+      board: "Launch Career"
     };
 
-    tasks.push(newTask);
+    await createTask(newTask);
   }
 
-  saveTasksToStorage(); // SAVE HERE
+  await fetchTasks();
+  renderTasks();
 
   document.getElementById("task-modal").close();
-  renderTasks();
 }
 
 /* ---------- INIT ---------- */
-function init() {
-  loadTasksFromStorage(); // LOAD FIRST
+async function init() {
+  await fetchTasks();
   renderTasks();
 
   document
