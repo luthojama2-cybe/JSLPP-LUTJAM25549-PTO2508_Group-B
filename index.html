@@ -15,15 +15,27 @@
   <body>
     <!-- Side bar -->
     <nav class="side-bar">
-      <div id="side-logo-div">
-        <img id="logo" src="./assets/logo-light.svg" />
-      </div>
+      <div id="side-logo-div" class="sidebar-logo">
+  <img id="logo" src="./assets/logo-light.svg" />
+</div>
       <div class="boards-nav-links-div">
         <h4>ALL BOARDS (1)</h4>
         <button class="board-btn">Launch Career</button>
       </div>
-    </nav>
+      <!-- Theme Toggle -->
+      <div class="theme-toggle">
+        <span>☀️</span>
 
+        <label class="switch">
+          <input type="checkbox" id="theme-toggle" />
+          <span class="slider"></span>
+        </label>
+
+        <span>🌙</span>
+      </div>
+      <button id="toggle-sidebar-btn">Hide Sidebar</button>
+    </nav>
+    <button id="show-sidebar-btn">👀</button>
     <div id="layout">
       <header>
         <h2>Launch Career</h2>
@@ -35,7 +47,7 @@
 
       <div class="container">
         <div id="loading-message">Loading tasks...</div>
-        <div id="error-message"></div>
+      <div id="error-message"></div>
         <main class="card-column-main">
           <div class="column-div" data-status="todo">
             <h4>TODO</h4>

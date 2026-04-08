@@ -289,6 +289,80 @@ async function init() {
     document
   .getElementById("delete-task-btn")
   .addEventListener("click", handleDeleteTask);
+
+  document
+  .getElementById("toggle-sidebar-btn")
+  .addEventListener("click", toggleSidebar);
+
+  document
+  .getElementById("toggle-sidebar-btn")
+  .addEventListener("click", toggleSidebar);
+
+document
+  .getElementById("show-sidebar-btn")
+  .addEventListener("click", showSidebar);
+
+  setupThemeToggle();
+  
 }
+
+function toggleSidebar() {
+  const sidebar = document.querySelector(".side-bar");
+  const layout = document.getElementById("layout");
+  const showBtn = document.getElementById("show-sidebar-btn");
+
+  sidebar.classList.add("hidden");
+  layout.classList.add("full-width");
+
+  // show floating button
+  showBtn.style.display = "block";
+
+  localStorage.setItem("sidebar_hidden", true);
+}
+
+function showSidebar() {
+  const sidebar = document.querySelector(".side-bar");
+  const layout = document.getElementById("layout");
+  const showBtn = document.getElementById("show-sidebar-btn");
+
+  sidebar.classList.remove("hidden");
+  layout.classList.remove("full-width");
+
+  // hide floating button
+  showBtn.style.display = "none";
+
+  localStorage.setItem("sidebar_hidden", false);
+}
+
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector(".side-bar");
+  const body = document.body;
+
+  sidebar.classList.toggle("show-sidebar");
+  body.classList.toggle("sidebar-open");
+}
+
+function setupThemeToggle() {
+  const toggle = document.getElementById("theme-toggle");
+
+  // load saved theme
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-mode");
+    toggle.checked = true;
+  }
+
+  toggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+      localStorage.setItem("theme", "dark");
+    } else {
+      localStorage.setItem("theme", "light");
+    }
+  });
+}
+
 
 document.addEventListener("DOMContentLoaded", init);
