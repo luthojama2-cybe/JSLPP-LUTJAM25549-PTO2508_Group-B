@@ -5,14 +5,18 @@ let tasks = [];
 let editingTaskId = null;
 
 
-/* =========================
-   LOCAL STORAGE
-========================= */
+/* LOCAL STORAGE */
 
+/*
+Saves the current tasks array to localStorage
+ */
 function saveTasksToStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
+/* 
+ Loads tasks from localStorage and assigns them to the tasks array
+ */
 function loadTasksFromStorage() {
   const stored = localStorage.getItem(STORAGE_KEY);
 
@@ -26,15 +30,21 @@ function loadTasksFromStorage() {
 }
 
 
-/* =========================
-   API CALLS
-========================= */
+/*  API CALLS */
 
+/**
+ * Fetches tasks from the API and renders them
+ * Shows loading and error states
+ * @async
+ * @returns {Promise<void>}
+ */
 async function fetchTasks() {
+
   const loading = document.getElementById("loading-message");
   const error = document.getElementById("error-message");
 
   try {
+
     loading.style.display = "block";
     error.style.display = "none";
 
@@ -62,8 +72,19 @@ async function fetchTasks() {
 }
 
 
+/**
+ * Sends a new task to the API
+ * @async
+ * @param {Object} task
+ * @param {string} task.title
+ * @param {string} task.description
+ * @param {"todo"|"doing"|"done"} task.status
+ * @returns {Promise<void>}
+ */
 async function createTask(task) {
+
   try {
+
     await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,13 +92,24 @@ async function createTask(task) {
     });
 
   } catch (err) {
+
     console.error("Create error:", err);
+
   }
 }
 
 
+/**
+ * Updates an existing task in the API
+ * @async
+ * @param {number|string} id
+ * @param {Object} updatedTask
+ * @returns {Promise<void>}
+ */
 async function updateTask(id, updatedTask) {
+
   try {
+
     await fetch(`${API_URL}/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -85,36 +117,61 @@ async function updateTask(id, updatedTask) {
     });
 
   } catch (err) {
+
     console.error("Update error:", err);
+
   }
 }
 
 
+/**
+ * Deletes a task from the API
+ * @async
+ * @param {number|string} id
+ * @returns {Promise<void>}
+ */
 async function deleteTask(id) {
+
   try {
+
     await fetch(`${API_URL}/${id}`, {
       method: "DELETE"
     });
 
   } catch (err) {
+
     console.error("Delete error:", err);
+
   }
 }
 
 
-/* =========================
-   RENDER TASKS
-========================= */
+/* RENDER TASKS */
 
+/**
+ * Returns the DOM container for a specific task column
+ * @param {"todo"|"doing"|"done"} status
+ * @returns {HTMLElement|null}
+ */
 function getTaskContainerByStatus(status) {
+
   return document.querySelector(
     `.column-div[data-status="${status}"] .tasks-container`
   );
+
 }
 
+
+/**
+ * Creates a DOM element for a task card
+ * @param {Object} task
+ * @param {string} task.title
+ * @returns {HTMLElement}
+ */
 function createTaskElement(task) {
 
   const el = document.createElement("div");
+
   el.className = "task-div";
   el.textContent = task.title;
 
@@ -123,6 +180,10 @@ function createTaskElement(task) {
   return el;
 }
 
+
+/**
+ * Renders all tasks into their correct columns
+ */
 function renderTasks() {
 
   document
@@ -138,13 +199,16 @@ function renderTasks() {
     }
 
   });
+
 }
 
 
-/* =========================
-   MODAL LOGIC
-========================= */
+/* MODAL LOGIC */
 
+/**
+ * Opens the task modal for creating or editing a task
+ * @param {Object|null} task
+ */
 function openTaskModal(task = null) {
 
   const modal = document.getElementById("task-modal");
@@ -180,6 +244,9 @@ function openTaskModal(task = null) {
 }
 
 
+/**
+ * Handles deleting the currently edited task
+ */
 function handleDeleteTask() {
 
   if (!editingTaskId) return;
@@ -197,13 +264,19 @@ function handleDeleteTask() {
   document.getElementById("task-modal").close();
 
   editingTaskId = null;
+
 }
 
 
-/* =========================
-   FORM HANDLING
-========================= */
+/* FORM HANDLING */
 
+/**
+ * Handles task form submission
+ * Creates or updates tasks
+ * @async
+ * @param {SubmitEvent} e
+ * @returns {Promise<void>}
+ */
 async function handleFormSubmit(e) {
 
   e.preventDefault();
@@ -217,15 +290,21 @@ async function handleFormSubmit(e) {
     const task = tasks.find(t => t.id === editingTaskId);
 
     if (task) {
+
       task.title = title;
       task.description = desc;
       task.status = status;
+
     }
 
     renderTasks();
     saveTasksToStorage();
 
-    await updateTask(editingTaskId, { title, description: desc, status });
+    await updateTask(editingTaskId, {
+      title,
+      description: desc,
+      status
+    });
 
   } else {
 
@@ -243,16 +322,19 @@ async function handleFormSubmit(e) {
     saveTasksToStorage();
 
     await createTask(newTask);
+
   }
 
   document.getElementById("task-modal").close();
+
 }
 
 
-/* =========================
-   SIDEBAR
-========================= */
+/* SIDEBAR */
 
+/**
+ * Hides the sidebar and expands the layout
+ */
 function toggleSidebar() {
 
   const sidebar = document.querySelector(".side-bar");
@@ -265,8 +347,13 @@ function toggleSidebar() {
   showBtn.style.display = "block";
 
   localStorage.setItem("sidebar_hidden", true);
+
 }
 
+
+/**
+ * Shows the sidebar again
+ */
 function showSidebar() {
 
   const sidebar = document.querySelector(".side-bar");
@@ -279,13 +366,15 @@ function showSidebar() {
   showBtn.style.display = "none";
 
   localStorage.setItem("sidebar_hidden", false);
+
 }
 
 
-/* =========================
-   THEME TOGGLE
-========================= */
+/* THEME TOGGLE */
 
+/**
+ * Initializes the theme toggle and syncs with localStorage
+ */
 function setupThemeToggle() {
 
   const toggle = document.getElementById("theme-toggle");
@@ -294,8 +383,10 @@ function setupThemeToggle() {
   const savedTheme = localStorage.getItem("theme");
 
   if (savedTheme === "dark") {
+
     document.body.classList.add("dark-mode");
     toggle.checked = true;
+
   }
 
   toggle.addEventListener("change", () => {
@@ -314,12 +405,16 @@ function setupThemeToggle() {
     mobileToggle.checked = toggle.checked;
 
     mobileToggle.addEventListener("change", () => {
+
       toggle.checked = mobileToggle.checked;
       toggle.dispatchEvent(new Event("change"));
+
     });
 
     toggle.addEventListener("change", () => {
+
       mobileToggle.checked = toggle.checked;
+
     });
 
   }
@@ -327,10 +422,16 @@ function setupThemeToggle() {
 }
 
 
-/* =========================
-   INIT
-========================= */
+/* INIT */
 
+/**
+ * Initializes the Kanban application
+ * - Loads cached tasks
+ * - Fetches tasks from API
+ * - Registers all event listeners
+ * @async
+ * @returns {Promise<void>}
+ */
 async function init() {
 
   loadTasksFromStorage();
@@ -377,6 +478,7 @@ async function init() {
     );
 
   setupThemeToggle();
+
 }
 
 document.addEventListener("DOMContentLoaded", init);
