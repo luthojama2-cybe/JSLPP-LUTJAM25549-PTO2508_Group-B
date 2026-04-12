@@ -94,3 +94,7 @@ A fully functional Kanban app that:
 - Has a responsive, mobile-friendly sidebar with a theme toggle switch.
 - App deployed to **Netlify** with a custom, readable URL.
 - Uses modular, well-documented code that is easy to maintain and scale.
+
+## Video Link To Presentation
+
+(https://www.loom.com/share/cf2ab7a9575b46d78f58942c3d253fe8);

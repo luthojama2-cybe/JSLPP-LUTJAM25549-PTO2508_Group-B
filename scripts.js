@@ -54,7 +54,21 @@ async function fetchTasks() {
 
     const data = await res.json();
 
-    tasks = data;
+    // Merge API tasks with locally stored tasks
+    const apiTasks = data;
+
+    const localTasks = tasks;
+
+    const mergedTasks = [...apiTasks];
+
+    localTasks.forEach(localTask => {
+      const exists = mergedTasks.some(t => t.id === localTask.id);
+      if (!exists) {
+        mergedTasks.push(localTask);
+      }
+    });
+
+    tasks = mergedTasks;
 
     saveTasksToStorage();
     renderTasks();
@@ -65,6 +79,8 @@ async function fetchTasks() {
 
     error.textContent = "⚠️ Failed to load tasks. Showing cached data.";
     error.style.display = "block";
+
+    renderTasks(); // show cached tasks
 
   } finally {
     loading.style.display = "none";
